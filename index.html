@@ -23,16 +23,21 @@
 
         // Fetch and display storage buckets
         function fetchBuckets() {
-            fetch(`https://storage.googleapis.com/storage/v1/b?key=${API_KEY}`)
-                .then(response => response.json())
-                .then(data => {
-                    let html = "<h3>Buckets:</h3>";
-                    data.items.forEach(bucket => {
-                        html += `<button onclick="fetchFiles('${bucket.name}')">${bucket.name}</button>`;
-                    });
-                    document.getElementById("buckets").innerHTML = html;
-                })
-                .catch(error => console.error("Error fetching buckets:", error));
+    fetch(`https://storage.googleapis.com/storage/v1/b?key=${API_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.items) {
+                document.getElementById("buckets").innerHTML = `<p style="color:red;">Error: ${data.error.message || "No buckets found."}</p>`;
+                console.error("Error fetching buckets:", data);
+                return;
+            }
+            let html = "<h3>Buckets:</h3>";
+            data.items.forEach(bucket => {
+                html += `<button onclick="fetchFiles('${bucket.name}')">${bucket.name}</button>`;
+            });
+            document.getElementById("buckets").innerHTML = html;
+        })
+        .catch(error => console.error("Error fetching buckets:", error));
         }
 
         // Fetch and display files inside a bucket
