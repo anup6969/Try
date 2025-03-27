@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Cloud Storage Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #buckets, #files { margin: 20px; padding: 10px; border: 1px solid #ccc; }
+        button { padding: 8px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>Google Cloud Storage Viewer</h2>
+
+    <button onclick="fetchBuckets()">Load Storage Buckets</button>
+    <div id="buckets"></div>
+    <div id="files"></div>
+
+    <script>
+        const API_KEY = "AKDAyIvCk56Epw_Enc5S0MIYyYIqQtCabm2QYkW0SqvLrxx9lPrA-IRbp8fcontLw4YNbtY5T98vNhY"; // 🔴 Replace with your API Key
+
+        // Fetch and display storage buckets
+        function fetchBuckets() {
+            fetch(`https://storage.googleapis.com/storage/v1/b?key=${API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = "<h3>Buckets:</h3>";
+                    data.items.forEach(bucket => {
+                        html += `<button onclick="fetchFiles('${bucket.name}')">${bucket.name}</button>`;
+                    });
+                    document.getElementById("buckets").innerHTML = html;
+                })
+                .catch(error => console.error("Error fetching buckets:", error));
+        }
+
+        // Fetch and display files inside a bucket
+        function fetchFiles(bucketName) {
+            fetch(`https://storage.googleapis.com/storage/v1/b/${bucketName}/o?key=${API_KEY}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = `<h3>Files in ${bucketName}:</h3>`;
+                    if (data.items) {
+                        data.items.forEach(file => {
+                            let fileURL = `https://storage.googleapis.com/${bucketName}/${file.name}`;
+                            html += `<p><a href="${fileURL}" target="_blank">${file.name}</a></p>`;
+                        });
+                    } else {
+                        html += "<p>No files found.</p>";
+                    }
+                    document.getElementById("files").innerHTML = html;
+                })
+                .catch(error => console.error("Error fetching files:", error));
+        }
+    </script>
+
+</body>
+</html>
